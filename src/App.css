@@ -1,0 +1,146 @@
+body {
+  background: transparent;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+}
+
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.card:hover {
+  box-shadow: none !important;
+}
+
+.card-header {
+  background: rgba(102, 126, 234, 0.3) !important;
+  padding: 15px;
+  border-bottom: none;
+  -webkit-app-region: drag;
+  user-select: none;
+  -webkit-user-select: none;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.card-header .btn {
+  -webkit-app-region: no-drag;
+}
+
+.card-body {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+textarea {
+  border-radius: 8px;
+  border: 2px solid rgba(102, 126, 234, 0.4);
+  font-family: 'Courier New', 'Monaco', monospace;
+  resize: none;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  background: transparent !important;
+  color: #333;
+}
+
+textarea:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  outline: none;
+}
+
+button,
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none !important;
+  font-size: 0.95rem;
+  padding: 0.6rem 1rem;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  background: rgba(102, 126, 234, 0.6) !important;
+  color: white !important;
+}
+
+.btn-primary {
+  background: rgba(102, 126, 234, 0.6) !important;
+}
+
+.btn-success {
+  background: rgba(40, 167, 69, 0.6) !important;
+}
+
+.btn-secondary {
+  background: rgba(108, 117, 125, 0.6) !important;
+}
+
+.btn-light {
+  background: rgba(248, 249, 250, 0.8) !important;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.alert {
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+  margin-bottom: 12px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
