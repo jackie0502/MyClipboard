@@ -12,6 +12,9 @@ const ClipboardHistoryRepo =
 const registerClipboardHandlers =
   require('./mainProcess/ipc/registerClipboardHandlers');
 
+const ClipboardMonitor =
+  require('./mainProcess/monitor/ClipboardMonitor');
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 420,
@@ -40,14 +43,33 @@ function createWindow() {
   // }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const historyFilePath = path.join(
     app.getPath('userData'),
     'clipboard-history.json'
   );
 
   const historyRepo =
-    new ClipboardHistoryRepo(historyFilePath);
+    new ClipboardHistoryRepo(historyFilePath, 5);
+
+  historyRepo.on('changed', () => {
+    if (
+      mainWindow &&
+      !mainWindow.isDestroyed()
+    ) {
+      mainWindow.webContents.send(
+        'clipboard:history-updated'
+      );
+    }
+  });
+
+  clipboardMonitor =
+    new ClipboardMonitor(
+      clipboard,
+      historyRepo
+    );
+
+  clipboardMonitor.start(500);
 
   const clipboardService =
     new ClipboardService(
@@ -82,5 +104,10 @@ app.on('window-all-closed', function () {
       process.kill(-process.pid);
     }
     app.quit();
+  }
+});
+app.on('before-quit', () => {
+  if (clipboardMonitor) {
+    clipboardMonitor.stop();
   }
 });

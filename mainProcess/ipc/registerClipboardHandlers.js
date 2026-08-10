@@ -1,34 +1,50 @@
 function registerClipboardHandlers(ipcMain, clipboardService) {
-  ipcMain.handle('clipboard:read', () => {
-    try {
-      const text = clipboardService.read();
+    ipcMain.handle('clipboard:read', () => {
+        try {
+        const text = clipboardService.read();
 
-      return {
-        success: true,
-        data: text
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  });
+        return {
+            success: true,
+            data: text
+        };
+        } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+        }
+    });
 
-  ipcMain.handle('clipboard:write', async (event, text) => {
-    try {
-      await clipboardService.copy(text);
+    ipcMain.handle('clipboard:write', async (event, text) => {
+        try {
+        await clipboardService.copy(text);
 
-      return {
-        success: true
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  });
+        return {
+            success: true
+        };
+        } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+        }
+    });
+    
+    ipcMain.handle('clipboard:history', async () => {
+        try {
+            const history = await clipboardService.getHistory();
+
+            return {
+            success: true,
+            data: history
+            };
+        } catch (error) {
+            return {
+            success: false,
+            error: error.message
+            };
+        }
+    });
 }
 
 module.exports = registerClipboardHandlers;

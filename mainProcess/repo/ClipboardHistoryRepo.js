@@ -1,8 +1,11 @@
 const fs = require('fs/promises');
+const EventEmitter = require('events');
 
-class ClipboardHistoryRepo {
-    constructor(historyFilePath) {
+class ClipboardHistoryRepo extends EventEmitter{
+    constructor(historyFilePath, maxRecords = 5) {
+        super();
         this.historyFilePath = historyFilePath;
+        this.maxRecords = maxRecords;
     }
 
     async getAll() {
@@ -23,8 +26,13 @@ class ClipboardHistoryRepo {
 
     async add(text){
         const history = await this.getAll();
-        const copiedAt = new Date().toISOString();
+        const alreadyExists = history.some((record) => 
+            record.text === text
+        );
 
+        if (alreadyExists)return null;
+
+        const copiedAt = new Date().toISOString();
         const record = {
             id: copiedAt,
             text,
@@ -33,13 +41,19 @@ class ClipboardHistoryRepo {
 
         history.push(record);
 
-        await fs.writeFile(
-            this.historyFilePath,
-            JSON.stringify(history, null, 2),
-            'utf8'
-        );
+        const limitedHistory = history.slice(-this.maxRecords);
+        await fs.writeFile(this.historyFilePath, JSON.stringify(limitedHistory, null, 2), 'utf8');
+        
+        this.emit('changed', record);
 
         return record;
+    }
+    async existsByText(text) {
+        const history = await this.getAll();
+
+        return history.some((record) => 
+            record.text === text
+        );
     }
 }
 module.exports = ClipboardHistoryRepo;
