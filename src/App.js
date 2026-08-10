@@ -1,130 +1,171 @@
-import React, { useState } from 'react';
-import { Container, Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import React, {
+  useCallback,
+  useEffect,
+  useState
+} from 'react';
+
+import {
+  Alert,
+  Button,
+  Card,
+  Container,
+  ListGroup,
+  Spinner
+} from 'react-bootstrap';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 const electronAPI = window.electronAPI;
 
 export default function App() {
-  const [text, setText] = useState('');
-  const [message, setMessage] = useState('');
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState(null);
 
-  const handleClose = () => {
-    window.close();
-  };
-
-  const handleRead = async () => {
+  const loadHistory = useCallback(async () => {
     try {
-      if (!electronAPI?.clipboard?.read) {
-        throw new Error('Electron API not available');
-      }
-      const result = await electronAPI.clipboard.read();
-      if (result.success) {
-        setText(result.data);
-        setMessage('✅ 已讀取剪貼簿');
-      } else {
-        setMessage('❌ 讀取失敗: ' + result.error);
-      }
-      setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      setMessage('❌ 讀取失敗: ' + error.message);
-    }
-  };
+      setLoading(true);
 
-  const handleWrite = async () => {
+      if (!electronAPI?.clipboard?.getHistory) {
+        throw new Error('Electron API unavailable');
+      }
+
+      const result =
+        await electronAPI.clipboard.getHistory();
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      setHistory(result.data);
+    } catch (error) {
+      setMessage({
+        type: 'danger',
+        text: `載入失敗：${error.message}`
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe =
+    electronAPI.clipboard.onHistoryUpdated(() => {
+loadHistory();
+    });
+
+    return () => {unsubscribe();};
+  }, [loadHistory]);
+
+  const handleCopy = async (text) => {
     try {
-      if (!electronAPI?.clipboard?.write) {
-        throw new Error('Electron API not available');
-      }
-      const result = await electronAPI.clipboard.write(text);
-      if (result.success) {
-        setMessage('✅ 已複製到剪貼簿');
-      } else {
-        setMessage('❌ 複製失敗: ' + result.error);
-      }
-      setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      setMessage('❌ 複製失敗: ' + error.message);
-    }
-  };
+      const result =
+        await electronAPI.clipboard.write(text);
 
-  const handleClear = () => {
-    setText('');
-    setMessage('');
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      setMessage({
+        type: 'success',
+        text: '已複製到剪貼簿'
+      });
+
+      await loadHistory();
+    } catch (error) {
+      setMessage({
+        type: 'danger',
+        text: `複製失敗：${error.message}`
+      });
+    }
   };
 
   return (
-    <Container className="p-2" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }}>
-      <Card className="w-100">
-        <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
-          <Card.Title className="mb-0">📋 剪貼簿</Card.Title>
-          <button
-            className="btn btn-sm btn-light"
-            onClick={handleClose}
-            style={{ padding: '0.25rem 0.5rem' }}
+    <Container
+      className="p-2"
+      style={{ height: '100vh' }}
+    >
+      <Card className="h-100">
+        <Card.Header
+          className="
+            bg-primary
+            text-white
+            d-flex
+            justify-content-between
+            align-items-center
+          "
+        >
+          <Card.Title className="mb-0">
+            剪貼簿紀錄
+          </Card.Title>
+
+          <Button
+            size="sm"
+            variant="light"
+            onClick={() => window.close()}
           >
-            ✕
-          </button>
+            ×
+          </Button>
         </Card.Header>
-        <Card.Body>
+
+        <Card.Body className="overflow-auto">
           {message && (
-            <Alert
-              variant={message.includes('✅') ? 'success' : 'danger'}
-              className="mb-3"
-            >
-              {message}
+            <Alert variant={message.type}>
+              {message.text}
             </Alert>
           )}
 
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold" style={{ fontSize: '0.9rem' }}>剪貼簿內容</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={7}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="輸入文字或點擊「讀取剪貼簿」按鈕..."
-              className="font-monospace"
-              style={{ fontSize: '0.85rem' }}
-            />
-          </Form.Group>
+          {loading && (
+            <div className="text-center py-4">
+              <Spinner animation="border" />
+            </div>
+          )}
 
-          <Row className="g-2">
-            <Col sm={6}>
-              <Button
-                variant="primary"
-                className="w-100"
-                onClick={handleRead}
-                style={{ fontSize: '0.9rem', padding: '0.5rem' }}
-              >
-                📤 讀取
-              </Button>
-            </Col>
-            <Col sm={6}>
-              <Button
-                variant="success"
-                className="w-100"
-                onClick={handleWrite}
-                style={{ fontSize: '0.9rem', padding: '0.5rem' }}
-              >
-                📥 複製
-              </Button>
-            </Col>
-          </Row>
+          {!loading && history.length === 0 && (
+            <Alert variant="secondary">
+              尚無剪貼簿紀錄
+            </Alert>
+          )}
 
-          <Row className="g-2 mt-2">
-            <Col sm={12}>
-              <Button
-                variant="secondary"
-                className="w-100"
-                onClick={handleClear}
-                style={{ fontSize: '0.9rem', padding: '0.5rem' }}
-              >
-                🗑️ 清空
-              </Button>
-            </Col>
-          </Row>
+          {!loading && history.length > 0 && (
+            <ListGroup>
+              {history.map((record) => (
+                <ListGroup.Item
+                  key={record.id}
+                  action
+                  onClick={() =>
+                    handleCopy(record.text)
+                  }
+                >
+                  <div
+                    className="text-break"
+                    style={{ whiteSpace: 'pre-wrap' }}
+                  >
+                    {record.text}
+                  </div>
+
+                  <small className="text-muted">
+                    {new Date(
+                      record.copiedAt
+                    ).toLocaleString()}
+                  </small>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          )}
         </Card.Body>
+
+        <Card.Footer>
+          <Button
+            className="w-100"
+            variant="outline-primary"
+            onClick={loadHistory}
+            disabled={loading}
+          >
+            重新整理
+          </Button>
+        </Card.Footer>
       </Card>
     </Container>
   );

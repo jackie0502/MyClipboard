@@ -1,7 +1,9 @@
 const fs = require('fs/promises');
+const EventEmitter = require('events');
 
-class ClipboardHistoryRepo {
+class ClipboardHistoryRepo extends EventEmitter{
     constructor(historyFilePath) {
+        super();
         this.historyFilePath = historyFilePath;
     }
 
@@ -38,6 +40,8 @@ class ClipboardHistoryRepo {
             JSON.stringify(history, null, 2),
             'utf8'
         );
+        
+        this.emit('changed', record);
 
         return record;
     }
