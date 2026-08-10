@@ -1,8 +1,16 @@
 const { app, BrowserWindow, ipcMain, clipboard } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
-
+const fs = require('fs/promises');
 let mainWindow;
+const ClipboardService =
+  require('./mainProcess/service/ClipboardService');
+
+const ClipboardHistoryRepo =
+  require('./mainProcess/repo/ClipboardHistoryRepo');
+
+const registerClipboardHandlers =
+  require('./mainProcess/ipc/registerClipboardHandlers');
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -33,6 +41,25 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  const historyFilePath = path.join(
+    app.getPath('userData'),
+    'clipboard-history.json'
+  );
+
+  const historyRepo =
+    new ClipboardHistoryRepo(historyFilePath);
+
+  const clipboardService =
+    new ClipboardService(
+      clipboard,
+      historyRepo
+    );
+
+  registerClipboardHandlers(
+    ipcMain,
+    clipboardService
+  );
+
   createWindow();
 
   app.on('activate', function () {
@@ -55,25 +82,5 @@ app.on('window-all-closed', function () {
       process.kill(-process.pid);
     }
     app.quit();
-  }
-});
-
-// 剪貼簿讀取
-ipcMain.handle('clipboard:read', () => {
-  try {
-    const text = clipboard.readText();
-    return { success: true, data: text };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-});
-
-// 剪貼簿寫入
-ipcMain.handle('clipboard:write', (event, text) => {
-  try {
-    clipboard.writeText(text);
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
   }
 });
