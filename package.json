@@ -7,7 +7,7 @@
   "scripts": {
     "react-start": "cross-env BROWSER=none PORT=3000 react-scripts start",
     "react-build": "react-scripts build",
-    "electron-start": "electron .",
+    "electron-start": "wait-on http://localhost:3000 && electron .",
     "start": "concurrently \"npm run react-start\" \"npm run electron-start\"",
     "build": "npm run react-build && electron-builder"
   },
