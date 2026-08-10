@@ -34,10 +34,16 @@ class ClipboardMonitor {
 
             if (currentText && currentText !== this.lastText) {
                 this.lastText = currentText;
+                const alreadyExists =
+                await this.historyRepo.existsByText(currentText);
 
-                await this.historyRepo.add(currentText);
+                if (!alreadyExists) {
+                    await this.historyRepo.add(currentText);
+                    console.log('偵測到新的剪貼簿內容：', currentText);
+                }else{
+                    console.log('相同內容已存在，不重複新增')
+                }
 
-                console.log('偵測到新的剪貼簿內容：', currentText);
             }
         } catch (error) {
             console.error('監控剪貼簿失敗：', error);

@@ -50,7 +50,7 @@ app.whenReady().then(async () => {
   );
 
   const historyRepo =
-    new ClipboardHistoryRepo(historyFilePath);
+    new ClipboardHistoryRepo(historyFilePath, 5);
 
   historyRepo.on('changed', () => {
     if (
