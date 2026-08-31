@@ -50,12 +50,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe =
-    electronAPI.clipboard.onHistoryUpdated(() => {
-loadHistory();
-    });
+    loadHistory();
 
-    return () => {unsubscribe();};
+    const unsubscribe =
+      electronAPI.clipboard.onHistoryUpdated(() => {
+        loadHistory();
+      });
+
+    return unsubscribe;
   }, [loadHistory]);
 
   const handleCopy = async (text) => {

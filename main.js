@@ -1,8 +1,8 @@
 const { app, BrowserWindow, ipcMain, clipboard } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
-const fs = require('fs/promises');
 let mainWindow;
+let clipboardMonitor;
 const ClipboardService =
   require('./mainProcess/service/ClipboardService');
 
@@ -91,18 +91,6 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
-    // 關閉時同時殺死 React 伺服器進程
-    if (process.platform === 'win32') {
-      try {
-        require('child_process').exec('taskkill /F /IM node.exe /T', (error) => {
-          if (!error) console.log('✅ React 伺服器已關閉');
-        });
-      } catch (e) {
-        console.log('React 伺服器已停止');
-      }
-    } else {
-      process.kill(-process.pid);
-    }
     app.quit();
   }
 });
