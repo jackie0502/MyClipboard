@@ -55,5 +55,15 @@ class ClipboardHistoryRepo extends EventEmitter{
             record.text === text
         );
     }
+
+    async clear() {
+        await fs.writeFile(
+            this.historyFilePath,
+            JSON.stringify([], null, 2),
+            'utf8'
+        );
+
+        this.emit('changed');
+    }
 }
 module.exports = ClipboardHistoryRepo;

@@ -22,6 +22,10 @@ class ClipboardService {
 
         return [...history].reverse();
     }
+
+    async clearHistory() {
+        await this.historyRepo.clear();
+    }
 }
 
 module.exports = ClipboardService;
