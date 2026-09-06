@@ -6,7 +6,6 @@ const {
   screen
 } = require('electron');
 const path = require('path');
-const isDev = require('electron-is-dev');
 let mainWindow;
 let handleWindow;
 let tray;
@@ -205,7 +204,7 @@ function createWindow() {
   mainWindow = createDockWindow(expandedWindowSize);
   handleWindow = createDockWindow(collapsedWindowSize);
 
-  const baseUrl = isDev
+  const baseUrl = !app.isPackaged
     ? 'http://localhost:3000'
     : `file://${path.join(__dirname, 'build/index.html')}`;
 
