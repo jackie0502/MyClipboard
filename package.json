@@ -19,7 +19,6 @@
     "cross-env": "7.0.3",
     "electron": "30.0.0",
     "electron-builder": "24.9.1",
-    "electron-is-dev": "2.0.0",
     "react-scripts": "5.0.1",
     "wait-on": "7.2.0"
   },
@@ -40,5 +39,29 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "build": {
+    "extends": null,
+    "appId": "com.jackie.myclipboard",
+    "productName": "MyClipboard",
+    "extraMetadata": {
+      "main": "main.js"
+    },
+    "files": [
+      "build/**/*",
+      "main.js",
+      "preload.js",
+      "mainProcess/**/*",
+      "clipboard.png",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "clipboard.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
