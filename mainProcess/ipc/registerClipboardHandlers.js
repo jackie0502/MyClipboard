@@ -45,6 +45,21 @@ function registerClipboardHandlers(ipcMain, clipboardService) {
             };
         }
     });
+
+    ipcMain.handle('clipboard:clear-history', async () => {
+        try {
+            await clipboardService.clearHistory();
+
+            return {
+                success: true
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    });
 }
 
 module.exports = registerClipboardHandlers;
